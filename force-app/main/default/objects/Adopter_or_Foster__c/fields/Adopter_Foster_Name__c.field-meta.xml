@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Adopter_Foster_Name__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <label>Adopter/Foster Name</label>
+    <referenceTo>Contact</referenceTo>
+    <relationshipLabel>Adoption/Foster Pets</relationshipLabel>
+    <relationshipName>Adopters_or_Fosters</relationshipName>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>
