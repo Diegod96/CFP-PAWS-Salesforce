@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>Parse_JSON_Request_From_PAWS_Pipeline</name>
+        <label>Parse JSON Request From PAWS Pipeline</label>
+        <locationX>176</locationX>
+        <locationY>170</locationY>
+        <actionName>ParseJSON</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>jsonString</name>
+            <value>
+                <elementReference>$Record.updated_contacts_json__c</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>ParseJSON</nameSegment>
+        <offset>0</offset>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+        <versionSegment>1</versionSegment>
+    </actionCalls>
+    <apiVersion>62.0</apiVersion>
+    <environments>Default</environments>
+    <interviewLabel>Parse PAWS Pipeline {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Parse PAWS Pipeline</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Parse_JSON_Request_From_PAWS_Pipeline</targetReference>
+        </connector>
+        <flowRunAsUser>TriggeringUser</flowRunAsUser>
+        <object>updated_contacts_batched__e</object>
+        <triggerType>PlatformEvent</triggerType>
+    </start>
+    <status>Draft</status>
+</Flow>

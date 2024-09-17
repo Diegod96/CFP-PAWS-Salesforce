@@ -115,7 +115,7 @@
             <label>Phone not null</label>
         </rules>
     </decisions>
-    <interviewLabel>Update_Phone_from_Classy-3_InterviewLabel</interviewLabel>
+    <interviewLabel>Update_Phone_from_Classy-2_InterviewLabel</interviewLabel>
     <label>Update Phone from Classy</label>
     <processMetadataValues>
         <name>ObjectType</name>

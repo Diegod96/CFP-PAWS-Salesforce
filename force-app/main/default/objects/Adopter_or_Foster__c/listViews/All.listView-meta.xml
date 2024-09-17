@@ -2,13 +2,11 @@
 <ListView xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>All</fullName>
     <columns>NAME</columns>
-    <columns>Adopter_Foster_Name__c</columns>
-    <columns>Animal_ID__c</columns>
-    <columns>CREATEDBY_USER</columns>
-    <columns>CREATED_DATE</columns>
-    <columns>Adoption_Foster_Date__c</columns>
-    <columns>Adoption_Foster_Type__c</columns>
-    <columns>Shelterluv_Pet_Link__c</columns>
     <filterScope>Everything</filterScope>
+    <filters>
+        <field>Adoption_Foster_Type__c</field>
+        <operation>equals</operation>
+        <value>Dog Adopter</value>
+    </filters>
     <label>All</label>
 </ListView>

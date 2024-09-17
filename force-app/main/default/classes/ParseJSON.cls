@@ -7,18 +7,46 @@
 **/
 public class ParseJSON {
 
+    public class ContactInfo {
+        @InvocableVariable
+        public String contactId;
+
+        @InvocableVariable
+        public String firstVolunteerDate;
+
+        @InvocableVariable
+        public String fosterEndDate;
+
+        @InvocableVariable
+        public String fosterStartDate;
+
+        @InvocableVariable
+        public String lastVolunteerDate;
+
+        @InvocableVariable
+        public String totalVolunteerHours;
+
+        @InvocableVariable
+        public String volunteerStatus;
+
+        @InvocableVariable
+        public String personIds;
+
+        @InvocableVariable
+        public String volgisticIds;
+    }
+
     public class RequestWrapper {
-        @InvocableVariable(required=true)
+        @InvocableVariable(Required=true)
         public String jsonString;
     }
     
     public class ResponseWrapper {
         @InvocableVariable
-        public List<ContactInfo> contactsInfo;
+        public List<ParseJSON.ContactInfo> contactsInfo;
     }
 
-
-    @InvocableMethod(label='Parse JSON')
+    @InvocableMethod(label='Parse JSON Request From PAWS Pipeline')
     public static List<ResponseWrapper> parseJson(List<RequestWrapper> requests) {
         
         System.debug('In ParseJSON');
@@ -58,16 +86,21 @@ public class ParseJSON {
                     System.debug('stringVolgisticIdsModified: ' + stringVolgisticIdsModified);
 
 
-
+                    // Assign to response
                     contactInfo.personIds = stringPersonIdsModified;
                     contactInfo.volgisticIds = stringVolgisticIdsModified;
+
+                    // These fields will always have a value
                     contactInfo.contactId = (String) contactMap.get('contactId');
-                    contactInfo.firstVolunteerDate = (String) contactMap.get('firstVolunteerDate');
-                    contactInfo.fosterEndDate = (String) contactMap.get('fosterEndDate');
-                    contactInfo.fosterStartDate = (String) contactMap.get('fosterStartDate');
-                    contactInfo.lastVolunteerDate = (String) contactMap.get('lastVolunteerDate');
-                    contactInfo.totalVolunteerHours = String.valueOf(contactMap.get('totalVolunteerHours'));
                     contactInfo.volunteerStatus = (String) contactMap.get('volunteerStatus');
+
+                    // These fields may be null
+                    contactInfo.firstVolunteerDate = contactMap.containsKey('firstVolunteerDate') && contactMap.get('firstVolunteerDate') != null ? (String) contactMap.get('firstVolunteerDate') : null;
+                    contactInfo.fosterEndDate = contactMap.containsKey('fosterEndDate') && contactMap.get('fosterEndDate') != null ? (String) contactMap.get('fosterEndDate') : null;
+                    contactInfo.fosterStartDate = contactMap.containsKey('fosterStartDate') && contactMap.get('fosterStartDate') != null ? (String) contactMap.get('fosterStartDate') : null;
+                    contactInfo.lastVolunteerDate = contactMap.containsKey('lastVolunteerDate') && contactMap.get('lastVolunteerDate') != null ? (String) contactMap.get('lastVolunteerDate') : null;
+                    contactInfo.totalVolunteerHours = contactMap.containsKey('totalVolunteerHours') && contactMap.get('totalVolunteerHours') != null ? String.valueOf(contactMap.get('totalVolunteerHours')) : null;
+
 
                     response.contactsInfo.add(contactInfo);
                 }

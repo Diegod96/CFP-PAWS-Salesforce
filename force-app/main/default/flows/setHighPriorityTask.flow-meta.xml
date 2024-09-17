@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>57.0</apiVersion>
+    <apiVersion>53.0</apiVersion>
     <decisions>
         <name>checkAmount</name>
         <label>checkAmount</label>
@@ -24,7 +24,6 @@
         </rules>
     </decisions>
     <description>Set priority to High if total gifts last n days &gt;= 1500</description>
-    <environments>Default</environments>
     <interviewLabel>setHighPriorityTask {!$Flow.CurrentDateTime}</interviewLabel>
     <label>setHighPriorityTask</label>
     <processMetadataValues>

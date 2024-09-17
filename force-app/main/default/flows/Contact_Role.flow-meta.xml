@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>50.0</apiVersion>
+    <assignments>
+        <name>Store_Contact_Role</name>
+        <label>Store Contact Role</label>
+        <locationX>176</locationX>
+        <locationY>253</locationY>
+        <assignmentItems>
+            <assignToReference>ContactRole</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Record.Role</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Update_Field</targetReference>
+        </connector>
+    </assignments>
+    <description>Stamps Opportunity Contact Role in the Contact Role field. 
+https://phillypaws--patrickpc.my.salesforce.com/00N7g000009l4On?setupid=OpportunityFields</description>
+    <interviewLabel>Contact Role {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Contact Role</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordUpdates>
+        <description>Updates the contact role field. 
+https://phillypaws--patrickpc.my.salesforce.com/00N7g000009l4On?setupid=OpportunityFields</description>
+        <name>Update_Field</name>
+        <label>Update Field</label>
+        <locationX>176</locationX>
+        <locationY>373</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.OpportunityId</elementReference>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Contact_Role__c</field>
+            <value>
+                <elementReference>ContactRole</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Opportunity</object>
+    </recordUpdates>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Store_Contact_Role</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>IsPrimary</field>
+            <operator>EqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <object>OpportunityContactRole</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+    <variables>
+        <description>Stores contact role.</description>
+        <name>ContactRole</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+</Flow>

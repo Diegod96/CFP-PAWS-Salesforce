@@ -1,214 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
-    <actionCalls>
-        <name>Parse_JSON</name>
-        <label>Parse JSON</label>
-        <locationX>176</locationX>
-        <locationY>170</locationY>
-        <actionName>ParseJSON</actionName>
-        <actionType>apex</actionType>
-        <connector>
-            <targetReference>Contacts_Loop</targetReference>
-        </connector>
-        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
-        <inputParameters>
-            <name>jsonString</name>
-            <value>
-                <elementReference>$Record.updated_contacts_json__c</elementReference>
-            </value>
-        </inputParameters>
-        <nameSegment>ParseJSON</nameSegment>
-        <offset>0</offset>
-        <outputParameters>
-            <assignToReference>ContactInfo</assignToReference>
-            <name>contactsInfo</name>
-        </outputParameters>
-        <versionSegment>1</versionSegment>
-    </actionCalls>
     <apiVersion>58.0</apiVersion>
-    <assignments>
-        <name>Add_Contact_To_Bulk_Update</name>
-        <label>Add Contact To Bulk Update</label>
-        <locationX>264</locationX>
-        <locationY>602</locationY>
-        <assignmentItems>
-            <assignToReference>UpdatedContactsFromLoop</assignToReference>
-            <operator>Add</operator>
-            <value>
-                <elementReference>Get_Contact</elementReference>
-            </value>
-        </assignmentItems>
-        <connector>
-            <targetReference>Contacts_Loop</targetReference>
-        </connector>
-    </assignments>
-    <assignments>
-        <name>Assign_Flow_Variables_To_Contact</name>
-        <label>Assign Flow Variables To Contact</label>
-        <locationX>264</locationX>
-        <locationY>494</locationY>
-        <assignmentItems>
-            <assignToReference>Get_Contact.First_volunteer_date__c</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>UpdatedFirstVoluneerDate</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>Get_Contact.Foster_End_Date__c</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>UpdatedFosterEndDate</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>Get_Contact.Foster_Start_Date__c</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>UpdatedFosterStartDate</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>Get_Contact.Last_volunteer_date__c</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>UpdatedLastVolunteerDate</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>Get_Contact.Total_volunteer_hours__c</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>UpdatedTotalVolunteerHours</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>Get_Contact.Volunteer_Status__c</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>UpdatedVolunteerStatus</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>Get_Contact.Duplicate_Ids__c</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>DuplicateIds</elementReference>
-            </value>
-        </assignmentItems>
-        <connector>
-            <targetReference>Add_Contact_To_Bulk_Update</targetReference>
-        </connector>
-    </assignments>
     <environments>Default</environments>
     <formulas>
-        <name>ConvertedFirstVolunteerDate</name>
-        <dataType>Date</dataType>
-        <expression>DATEVALUE({!FirstVolunteerDate})</expression>
+        <name>NOW</name>
+        <dataType>DateTime</dataType>
+        <expression>NOW()</expression>
     </formulas>
     <formulas>
-        <name>ConvertedFosterEndDate</name>
-        <dataType>Date</dataType>
-        <expression>DATEVALUE({!FosterEndDate})</expression>
-    </formulas>
-    <formulas>
-        <name>ConvertedFosterStartDate</name>
-        <dataType>Date</dataType>
-        <expression>DATEVALUE({!FosterStartDate})</expression>
-    </formulas>
-    <formulas>
-        <name>ConvertedLastVolunteerDate</name>
-        <dataType>Date</dataType>
-        <expression>DATEVALUE({!LastVolunteerDate})</expression>
-    </formulas>
-    <formulas>
-        <name>ConvertedTotalVolunteerHours</name>
-        <dataType>Number</dataType>
-        <expression>VALUE({!TotalVolunteerHours})</expression>
-        <scale>2</scale>
-    </formulas>
-    <formulas>
-        <name>DuplicatePersonIds</name>
-        <dataType>String</dataType>
-        <expression>SUBSTITUTE(SUBSTITUTE({!Contacts_Loop.personIds}, &apos;[&apos;, &apos;&apos;), &apos;]&apos;, &apos;&apos;)</expression>
-    </formulas>
-    <formulas>
-        <name>DuplicateVolgisticIds</name>
-        <dataType>String</dataType>
-        <expression>SUBSTITUTE(SUBSTITUTE({!Contacts_Loop.volgisticIds}, &apos;[&apos;, &apos;&apos;), &apos;]&apos;, &apos;&apos;)</expression>
-    </formulas>
-    <formulas>
-        <name>UpdatedFirstVoluneerDate</name>
+        <name>updatedFirstVolunteerDate</name>
         <dataType>Date</dataType>
         <expression>IF(
-    ISBLANK({!Contacts_Loop.firstVolunteerDate}), 
-    {!Get_Contact.First_volunteer_date__c}, 
-    DATEVALUE({!Contacts_Loop.firstVolunteerDate})
+    ISBLANK({!responseFirstVolunteerDate}), 
+    {!CurrentContact.First_volunteer_date__c}, 
+    DATEVALUE({!responseFirstVolunteerDate})
 )</expression>
     </formulas>
     <formulas>
-        <name>UpdatedFosterEndDate</name>
+        <name>updatedFosterEndDate</name>
         <dataType>Date</dataType>
         <expression>IF(
-    ISBLANK({!Contacts_Loop.fosterEndDate}), 
-    {!Get_Contact.Foster_End_Date__c}, 
-    DATEVALUE({!Contacts_Loop.fosterEndDate})
+    ISBLANK({!responseFosterEndDate}), 
+    {!CurrentContact.Foster_End_Date__c}, 
+    DATEVALUE({!responseFosterEndDate})
 )</expression>
     </formulas>
     <formulas>
-        <name>UpdatedFosterStartDate</name>
+        <name>updatedFosterStartDate</name>
         <dataType>Date</dataType>
         <expression>IF(
-    ISBLANK({!Contacts_Loop.fosterStartDate}), 
-    {!Get_Contact.Foster_Start_Date__c}, 
-    DATEVALUE({!Contacts_Loop.fosterStartDate})
+    ISBLANK({!responseFosterStartDate}), 
+    {!CurrentContact.Foster_Start_Date__c}, 
+    DATEVALUE({!responseFosterStartDate})
 )</expression>
     </formulas>
     <formulas>
-        <name>UpdatedLastVolunteerDate</name>
+        <name>updatedLastVolunteerDate</name>
         <dataType>Date</dataType>
         <expression>IF(
-    ISBLANK({!Contacts_Loop.lastVolunteerDate}), 
-    {!Get_Contact.Last_volunteer_date__c}, 
-    DATEVALUE({!Contacts_Loop.lastVolunteerDate})
+    ISBLANK({!responseLastVolunteerDate}), 
+    {!CurrentContact.Last_volunteer_date__c}, 
+    DATEVALUE({!responseLastVolunteerDate})
 )</expression>
     </formulas>
     <formulas>
-        <name>UpdatedTotalVolunteerHours</name>
+        <name>updatedTotalVolunteerHours</name>
         <dataType>Number</dataType>
         <expression>IF(
-    ISBLANK({!Contacts_Loop.totalVolunteerHours}), 
-    {!Get_Contact.Total_volunteer_hours__c}, 
-    VALUE({!Contacts_Loop.totalVolunteerHours})
+    ISBLANK({!responseTotalVolunterHours}), 
+    {!CurrentContact.Total_volunteer_hours__c}, 
+    VALUE({!responseTotalVolunterHours})
 )</expression>
         <scale>2</scale>
-    </formulas>
-    <formulas>
-        <name>UpdatedVolunteerStatus</name>
-        <dataType>String</dataType>
-        <expression>IF(
-    ISBLANK({!Contacts_Loop.volunteerStatus}),
-    TEXT({!Get_Contact.Volunteer_Status__c}),
-    {!Contacts_Loop.volunteerStatus}
-)</expression>
     </formulas>
     <interviewLabel>Process Contacts From Pipeline {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Process Contacts From Pipeline</label>
-    <loops>
-        <description>Loop through contacts returned by Apex Action</description>
-        <name>Contacts_Loop</name>
-        <label>Contacts Loop</label>
-        <locationX>176</locationX>
-        <locationY>278</locationY>
-        <collectionReference>ContactInfo</collectionReference>
-        <iterationOrder>Asc</iterationOrder>
-        <nextValueConnector>
-            <targetReference>Get_Contact</targetReference>
-        </nextValueConnector>
-        <noMoreValuesConnector>
-            <targetReference>Update_Contacts</targetReference>
-        </noMoreValuesConnector>
-    </loops>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -228,61 +74,33 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
-    <recordLookups>
-        <description>Get contact from PAWS Org using the Id of the current updated contact in the Contact Loop</description>
-        <name>Get_Contact</name>
-        <label>Get Contact</label>
-        <locationX>264</locationX>
-        <locationY>386</locationY>
-        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <connector>
-            <targetReference>Assign_Flow_Variables_To_Contact</targetReference>
-        </connector>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>Id</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>Contacts_Loop.contactId</elementReference>
-            </value>
-        </filters>
-        <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>Contact</object>
-        <queriedFields>Id</queriedFields>
-        <queriedFields>Duplicate_Person_Ids__c</queriedFields>
-        <queriedFields>Duplicate_Volgistic_Ids__c</queriedFields>
-        <queriedFields>First_volunteer_date__c</queriedFields>
-        <queriedFields>Foster_End_Date__c</queriedFields>
-        <queriedFields>Foster_Start_Date__c</queriedFields>
-        <queriedFields>Last_volunteer_date__c</queriedFields>
-        <queriedFields>Total_volunteer_hours__c</queriedFields>
-        <queriedFields>Volunteer_Status__c</queriedFields>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
-    </recordLookups>
-    <recordUpdates>
-        <name>Update_Contacts</name>
-        <label>Update Contacts</label>
-        <locationX>176</locationX>
-        <locationY>794</locationY>
-        <inputReference>UpdatedContactsFromLoop</inputReference>
-    </recordUpdates>
     <start>
         <locationX>50</locationX>
         <locationY>0</locationY>
-        <connector>
-            <targetReference>Parse_JSON</targetReference>
-        </connector>
         <flowRunAsUser>TriggeringUser</flowRunAsUser>
         <object>updated_contacts_batched__e</object>
         <triggerType>PlatformEvent</triggerType>
     </start>
-    <status>Active</status>
+    <status>InvalidDraft</status>
     <textTemplates>
         <name>DuplicateIds</name>
-        <isViewedAsPlainText>true</isViewedAsPlainText>
-        <text>Volgistic Ids: {!DuplicateVolgisticIds}
-ShelverLuv Person Ids: {!DuplicatePersonIds}</text>
+        <isViewedAsPlainText>false</isViewedAsPlainText>
+        <text>&lt;p&gt;Volgistic Ids: {!responseVolgisticIds}&lt;/p&gt;&lt;p&gt;ShelverLuv Person Ids: {!responsePersonIds}&lt;/p&gt;</text>
     </textTemplates>
+    <variables>
+        <name>ContactIdCollection</name>
+        <dataType>String</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>ContactIds</name>
+        <dataType>String</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
     <variables>
         <name>ContactInfo</name>
         <apexClass>ContactInfo</apexClass>
@@ -290,6 +108,14 @@ ShelverLuv Person Ids: {!DuplicatePersonIds}</text>
         <isCollection>true</isCollection>
         <isInput>true</isInput>
         <isOutput>true</isOutput>
+    </variables>
+    <variables>
+        <name>ContactsCollection</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Contact</objectType>
     </variables>
     <variables>
         <name>ContactsFromParser</name>
@@ -300,39 +126,100 @@ ShelverLuv Person Ids: {!DuplicatePersonIds}</text>
         <objectType>Contact</objectType>
     </variables>
     <variables>
-        <name>FirstVolunteerDate</name>
+        <name>contactsToBeUpdated</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Contact</objectType>
+    </variables>
+    <variables>
+        <name>CurrentContact</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Contact</objectType>
+    </variables>
+    <variables>
+        <name>CurrentContactInfo</name>
+        <apexClass>ContactInfo</apexClass>
+        <dataType>Apex</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>currentItem_Collection_Filter_1</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Contact</objectType>
+    </variables>
+    <variables>
+        <name>responseFirstVolunteerDate</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
     </variables>
     <variables>
-        <name>FosterEndDate</name>
+        <name>responseFosterEndDate</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
     </variables>
     <variables>
-        <name>FosterStartDate</name>
+        <name>responseFosterStartDate</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
     </variables>
     <variables>
-        <name>LastVolunteerDate</name>
+        <name>responseLastVolunteerDate</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
     </variables>
     <variables>
-        <name>TotalVolunteerHours</name>
+        <name>responsePersonIds</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>responseTotalVolunterHours</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>responseVolgisticIds</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>responseVolunteerStatus</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>updatedContacts</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>true</isInput>
+        <isOutput>true</isOutput>
+        <objectType>Contact</objectType>
     </variables>
     <variables>
         <name>UpdatedContactsFromAction</name>
@@ -349,12 +236,5 @@ ShelverLuv Person Ids: {!DuplicatePersonIds}</text>
         <isInput>true</isInput>
         <isOutput>true</isOutput>
         <objectType>Contact</objectType>
-    </variables>
-    <variables>
-        <name>VolunteerStatus</name>
-        <dataType>String</dataType>
-        <isCollection>false</isCollection>
-        <isInput>false</isInput>
-        <isOutput>false</isOutput>
     </variables>
 </Flow>

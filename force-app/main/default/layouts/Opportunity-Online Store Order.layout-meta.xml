@@ -81,10 +81,6 @@
                 <behavior>Edit</behavior>
                 <field>Charitable_Fund_Name__c</field>
             </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Outlier__c</field>
-            </layoutItems>
         </layoutColumns>
         <layoutColumns/>
         <style>TwoColumnsTopToBottom</style>

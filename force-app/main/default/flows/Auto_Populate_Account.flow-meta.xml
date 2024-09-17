@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>49.0</apiVersion>
+    <assignments>
+        <name>myVariable_waitStartTimeAssignment</name>
+        <label>myVariable_waitStartTimeAssignment</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>myVariable_waitStartTimeVariable</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Flow.CurrentDateTime</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>myDecision</targetReference>
+        </connector>
+    </assignments>
     <decisions>
         <processMetadataValues>
             <name>index</name>
@@ -51,7 +67,7 @@
         </rules>
     </decisions>
     <description>This process auto populates the Account lookup field with the Contact&apos;s Account</description>
-    <interviewLabel>Auto_Populate_Account-2_InterviewLabel</interviewLabel>
+    <interviewLabel>Auto_Populate_Account-1_InterviewLabel</interviewLabel>
     <label>Auto Populate Account</label>
     <processMetadataValues>
         <name>ObjectType</name>
@@ -86,9 +102,6 @@
             </value>
         </processMetadataValues>
         <processMetadataValues>
-            <name>extraTypeInfo</name>
-        </processMetadataValues>
-        <processMetadataValues>
             <name>isChildRelationship</name>
             <value>
                 <booleanValue>false</booleanValue>
@@ -99,9 +112,6 @@
             <value>
                 <stringValue>[Adopter_or_Foster__c]</stringValue>
             </value>
-        </processMetadataValues>
-        <processMetadataValues>
-            <name>referenceTargetField</name>
         </processMetadataValues>
         <name>myRule_1_A1</name>
         <label>Assign Contact&apos;s Account</label>
@@ -153,8 +163,8 @@
         </inputAssignments>
         <object>Adopter_or_Foster__c</object>
     </recordUpdates>
-    <startElementReference>myDecision</startElementReference>
-    <status>Draft</status>
+    <startElementReference>myVariable_waitStartTimeAssignment</startElementReference>
+    <status>Active</status>
     <variables>
         <name>myVariable_current</name>
         <dataType>SObject</dataType>
@@ -170,5 +180,15 @@
         <isInput>true</isInput>
         <isOutput>false</isOutput>
         <objectType>Adopter_or_Foster__c</objectType>
+    </variables>
+    <variables>
+        <name>myVariable_waitStartTimeVariable</name>
+        <dataType>DateTime</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <value>
+            <elementReference>$Flow.CurrentDateTime</elementReference>
+        </value>
     </variables>
 </Flow>

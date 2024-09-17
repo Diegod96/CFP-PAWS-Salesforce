@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>57.0</apiVersion>
+    <apiVersion>51.0</apiVersion>
     <decisions>
         <processMetadataValues>
             <name>index</name>
@@ -47,13 +47,13 @@
                 <leftValueReference>myVariable_current.npe03__Amount__c</leftValueReference>
                 <operator>GreaterThanOrEqualTo</operator>
                 <rightValue>
-                    <numberValue>50.0</numberValue>
+                    <numberValue>30.0</numberValue>
                 </rightValue>
             </conditions>
             <connector>
                 <targetReference>myRule_1_A1</targetReference>
             </connector>
-            <label>New recur donation - LH $50+</label>
+            <label>New recur donation - LH $30+</label>
         </rules>
     </decisions>
     <decisions>
@@ -99,7 +99,7 @@
                 <leftValueReference>myVariable_current.npe03__Amount__c</leftValueReference>
                 <operator>GreaterThanOrEqualTo</operator>
                 <rightValue>
-                    <numberValue>5.0</numberValue>
+                    <numberValue>20.0</numberValue>
                 </rightValue>
             </conditions>
             <conditions>
@@ -130,13 +130,13 @@
                 <leftValueReference>myVariable_current.npe03__Amount__c</leftValueReference>
                 <operator>LessThan</operator>
                 <rightValue>
-                    <numberValue>49.0</numberValue>
+                    <numberValue>30.0</numberValue>
                 </rightValue>
             </conditions>
             <connector>
                 <targetReference>myRule_4_A1</targetReference>
             </connector>
-            <label>New recur donation - TK $5-$49</label>
+            <label>New recur donation - TK $20-$29</label>
         </rules>
     </decisions>
     <formulas>
@@ -146,7 +146,7 @@
                 <stringValue>TODAY()</stringValue>
             </value>
         </processMetadataValues>
-        <name>formula_2_myRule_1_A1_5809271416</name>
+        <name>formula_2_myRule_1_A1_0015037969</name>
         <dataType>Date</dataType>
         <expression>TODAY()</expression>
     </formulas>
@@ -157,11 +157,11 @@
                 <stringValue>TODAY()</stringValue>
             </value>
         </processMetadataValues>
-        <name>formula_5_myRule_4_A1_0329604905</name>
+        <name>formula_5_myRule_4_A1_6054711870</name>
         <dataType>Date</dataType>
         <expression>TODAY()</expression>
     </formulas>
-    <interviewLabel>TY_Task_for_New_Recurring_Donation-8_InterviewLabel</interviewLabel>
+    <interviewLabel>TY_Task_for_New_Recurring_Donation-5_InterviewLabel</interviewLabel>
     <label>TY Task for New Recurring Donation</label>
     <processMetadataValues>
         <name>ObjectType</name>
@@ -226,7 +226,7 @@
             </processMetadataValues>
             <field>ActivityDate</field>
             <value>
-                <elementReference>formula_2_myRule_1_A1_5809271416</elementReference>
+                <elementReference>formula_2_myRule_1_A1_0015037969</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -545,7 +545,7 @@
             </processMetadataValues>
             <field>ActivityDate</field>
             <value>
-                <elementReference>formula_5_myRule_4_A1_0329604905</elementReference>
+                <elementReference>formula_5_myRule_4_A1_6054711870</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -713,7 +713,7 @@
             </processMetadataValues>
             <field>Subject</field>
             <value>
-                <stringValue>Automated Task: TK to thank donor for becoming a monthly supporter. (Remember to create anniversary follow up task once this task is complete.)</stringValue>
+                <stringValue>Automated Task: TK to thank donor for becoming a monthly supporter.</stringValue>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -827,7 +827,7 @@
         <object>Task</object>
     </recordCreates>
     <startElementReference>myDecision</startElementReference>
-    <status>Obsolete</status>
+    <status>Active</status>
     <variables>
         <name>myVariable_current</name>
         <dataType>SObject</dataType>
