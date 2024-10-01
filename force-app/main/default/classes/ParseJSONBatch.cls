@@ -67,8 +67,13 @@ public class ParseJSONBatch implements Database.Batchable<SObject>, Database.Sta
                 stringVolgisticIds = stringVolgisticIds == '[]' ? '[]' : stringVolgisticIds;
 
                 // Modify the strings by removing brackets if they are not '[]'
-                String stringPersonIdsModified = stringPersonIds != '[]' ? stringPersonIds.replace('[', '').replace(']', '') : stringPersonIds;
-                String stringVolgisticIdsModified = stringVolgisticIds != '[]' ? stringVolgisticIds.replace('[', '').replace(']', '') : stringVolgisticIds;
+                String stringPersonIdsModified = stringPersonIds != null && stringPersonIds != '[]'
+                    ? stringPersonIds.replace('[', '').replace(']', '')
+                    : (stringPersonIds != null ? stringPersonIds : '');
+                
+                String stringVolgisticIdsModified = stringVolgisticIds != null && stringVolgisticIds != '[]'
+                    ? stringVolgisticIds.replace('[', '').replace(']', '')
+                    : (stringVolgisticIds != null ? stringVolgisticIds : '');
 
                 contact.Last_Sync_With_Pipeline__c = Datetime.now();
                 contact.First_volunteer_date__c = contactInfo.get('firstVolunteerDate') != null ? Date.valueOf((String) contactInfo.get('firstVolunteerDate')) : contact.First_volunteer_date__c;
@@ -102,6 +107,33 @@ public class ParseJSONBatch implements Database.Batchable<SObject>, Database.Sta
 
     // Finish method to log when the batch completes
     public void finish(Database.BatchableContext bc) {
-        System.debug('Processing completed');
+        if (!failedRecords.isEmpty()) {
+            // Construct the email body with failed record details
+            String body = 'The following contacts failed to update:\n\n';
+            for (String failure : failedRecords) {
+                body += failure + '\n';
+            }
+    
+            // Construct the email
+            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+            
+            // Set the recipient email address
+            email.setToAddresses(new String[] { 'ddphillyfan@gmail.com' });
+            
+            // Set subject and body for the email
+            email.setSubject('Batch Update Failures: Contact Records');
+            email.setPlainTextBody(body);
+    
+            // Optionally set a Reply-To address and Sender Name
+            email.setReplyTo('ddphillyfan@gmail.com');
+            email.setSenderDisplayName('Salesforce Batch Processor');
+    
+            // Send the email
+            Messaging.sendEmail(new Messaging.SingleEmailMessage[] { email });
+    
+            System.debug('Failure email sent with body: ' + body);
+        } else {
+            System.debug('No failures detected in batch process.');
+        }
     }
 }
