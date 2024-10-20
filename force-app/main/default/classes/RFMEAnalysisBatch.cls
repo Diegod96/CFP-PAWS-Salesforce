@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : Diego Delgado
  * @group             : 
- * @last modified on  : 10-18-2024
+ * @last modified on  : 10-20-2024
  * @last modified by  : Diego Delgado
 **/
 global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.Stateful {
@@ -48,6 +48,7 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
             contact.Number_Of_Opportunities__c = frequency;
             contact.Monetary__c = monetary;
             contact.Volunteer_or_Foster_Days_Between__c = engagement;
+            contact.RFME_Analysis_Date__c = Date.today();
 
             // Add contact to list of contacts to update
             System.debug('Contact record added to update list: ' + contact);
