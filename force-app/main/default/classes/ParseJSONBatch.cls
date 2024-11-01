@@ -31,7 +31,7 @@ public class ParseJSONBatch implements Database.Batchable<SObject>, Database.Sta
 
         // Query for the Contact records based on the parsed IDs
         return Database.getQueryLocator([
-                SELECT Id, Last_Sync_With_Pipeline__c, First_volunteer_date__c, Last_volunteer_date__c, Duplicate_Person_Ids__c, Duplicate_Volgistic_Ids__c, Foster_Start_Date__c, Foster_End_Date__c, Total_volunteer_hours__c, Volunteer_Status__c
+                SELECT Id, Last_Sync_With_Pipeline__c, First_volunteer_date__c,Last_Shift_Date__c, Last_volunteer_date__c, Duplicate_Person_Ids__c, Duplicate_Volgistic_Ids__c, Foster_Start_Date__c, Foster_End_Date__c, Total_volunteer_hours__c, Volunteer_Status__c
                 FROM Contact
                 WHERE Id IN :contactIds
         ]);
