@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-09-2024
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public class ParseJSONBatch implements Database.Batchable<SObject>, Database.Stateful {
 
     // JSON string to process in the batch
@@ -31,7 +38,7 @@ public class ParseJSONBatch implements Database.Batchable<SObject>, Database.Sta
 
         // Query for the Contact records based on the parsed IDs
         return Database.getQueryLocator([
-                SELECT Id, Last_Sync_With_Pipeline__c, First_volunteer_date__c,Last_Shift_Date__c, Last_volunteer_date__c, Duplicate_Person_Ids__c, Duplicate_Volgistic_Ids__c, Foster_Start_Date__c, Foster_End_Date__c, Total_volunteer_hours__c, Volunteer_Status__c
+                SELECT Id, Last_Sync_With_Pipeline__c, First_volunteer_date__c, Last_volunteer_date__c, Duplicate_Person_Ids__c, Duplicate_Volgistic_Ids__c, Foster_Start_Date__c, Foster_End_Date__c, Total_volunteer_hours__c, Volunteer_Status__c
                 FROM Contact
                 WHERE Id IN :contactIds
         ]);
@@ -79,7 +86,7 @@ public class ParseJSONBatch implements Database.Batchable<SObject>, Database.Sta
                 contact.First_volunteer_date__c = contactInfo.get('firstVolunteerDate') != null ? Date.valueOf((String) contactInfo.get('firstVolunteerDate')) : contact.First_volunteer_date__c;
                 contact.Foster_End_Date__c = contactInfo.get('fosterEndDate') != null ? Date.valueOf((String) contactInfo.get('fosterEndDate')) : contact.Foster_End_Date__c;
                 contact.Foster_Start_Date__c = contactInfo.get('fosterStartDate') != null ? Date.valueOf((String) contactInfo.get('fosterStartDate')) : contact.Foster_Start_Date__c;
-                contact.Last_volunteer_date__c = contactInfo.get('lastVolunteerDate') != null ? Date.valueOf((String) contactInfo.get('lastVolunteerDate')) : contact.Last_volunteer_date__c;
+                contact.Last_Shift_Date__c = contactInfo.get('lastShiftDate') != null ? Date.valueOf((String) contactInfo.get('lastShiftDate')) : contact.Last_Shift_Date__c;
                 contact.Total_volunteer_hours__c = contactInfo.get('totalVolunteerHours') != null ? Decimal.valueOf(contactInfo.get('totalVolunteerHours').toString()) : contact.Total_volunteer_hours__c;
                 contact.Volunteer_Status__c = contactInfo.get('volunteerStatus') != null ? (String) contactInfo.get('volunteerStatus') : contact.Volunteer_Status__c;
                 contact.Duplicated_Volgistics_Ids__c = stringVolgisticIdsModified;

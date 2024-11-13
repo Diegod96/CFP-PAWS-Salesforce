@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-09-2024
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 @IsTest
 public class ParseJSONBatchTest {
     
@@ -10,7 +17,7 @@ public class ParseJSONBatchTest {
                 LastName = 'TestContact' + i,
                 Volunteer_Status__c = 'Active',
                 First_volunteer_date__c = Date.newInstance(2020, 1, 1),
-                Last_volunteer_date__c = Date.newInstance(2020, 1, 1),
+                Last_Shift_Date__c = Date.newInstance(2020, 1, 1),
                 Foster_Start_Date__c = Date.newInstance(2020, 6, 1),
                 Foster_End_Date__c = Date.newInstance(2021, 6, 1),
                 Duplicated_Person_Ids__c = '',
@@ -115,7 +122,7 @@ public class ParseJSONBatchTest {
                 '{"contactId": "' + contact.Id + '", ' +
                 '"volunteerStatus": "' + volunteerStatus + '", ' +
                 '"firstVolunteerDate": "2022-01-01", ' +
-                '"lastVolunteerDate": "2022-01-01", ' +
+                '"lastShiftDate": "2022-01-01", ' +
                 '"fosterStartDate": "2022-06-01", ' +
                 '"fosterEndDate": "2023-06-01", ' +
                 '"personIds": "[123,12345]", ' +
