@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : Diego Delgado
  * @group             : 
- * @last modified on  : 10-20-2024
+ * @last modified on  : 12-06-2024
  * @last modified by  : Diego Delgado
 **/
 global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.Stateful {
@@ -10,10 +10,13 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
     private List<Contact> updatedContacts = new List<Contact>();
 
     global Database.QueryLocator start(Database.BatchableContext BC) {
-        String query = 'SELECT Id, Amount, npsp__Primary_Contact__c, CloseDate ' +
+        
+        
+        String query = 'SELECT Id, Amount, StageName, npsp__Primary_Contact__c, CloseDate ' +
                        'FROM Opportunity ' +
                        'WHERE Amount != null AND npsp__Primary_Contact__c != null ' +
-                       'AND CloseDate >= LAST_N_DAYS:365 AND StageName = \'Closed Won\'';
+                       'AND CloseDate >= THIS_YEAR AND StageName = \'Closed Won\'';
+        
 
         return Database.getQueryLocator(query);
     }
@@ -29,6 +32,8 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
             contactToOpportunitiesMap.get(opp.npsp__Primary_Contact__c).add(opp);
         }
 
+        System.debug('contactToOpportunitiesMap => ' + contactToOpportunitiesMap);
+
         Set<Id> contactIds = contactToOpportunitiesMap.keySet();
         List<Contact> contacts = [SELECT Id, Name, Last_volunteer_date__c, Date_Of_Current_Foster__c, Date_Of_Last_Foster_Returned__c FROM Contact WHERE Id IN :contactIds];
 
@@ -40,14 +45,22 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
             // Calculate RFME values using RFMEUtilityClass
             Integer recency = RFMEUtilityClass.calculateRecency(opportunities);
             Integer frequency = RFMEUtilityClass.calculateFrequency(opportunities);
-            Decimal monetary = RFMEUtilityClass.calculateMonetary(opportunities);
-            Integer engagement = RFMEUtilityClass.calculateEngagement(contact);
+            Integer monetary = RFMEUtilityClass.calculateMonetary(opportunities);
+            String engagement = RFMEUtilityClass.calculateEngagement(contact, recency);
+            Integer volunteerOrFosterStatus = RFMEUtilityClass.calculateVolunteerOrFosterStatus(contact);
+            String impact = RFMEUtilityClass.calculateImpact(contact, frequency, monetary);
+            Integer closedWonDonationsThisYear = RFMEUtilityClass.calculateClosedWonDonationsThisYear(opportunities);
 
             // Update Contact record with RFME values
             contact.Recency__c = recency;
-            contact.Number_Of_Opportunities__c = frequency;
+            contact.Frequency__c = frequency;
             contact.Monetary__c = monetary;
-            contact.Volunteer_or_Foster_Days_Between__c = engagement;
+            contact.Engagement__c = engagement;
+            contact.Volunteer_Foster_Engagement__c = volunteerOrFosterStatus;
+            contact.Impact__c = impact;
+            contact.Total_Closed_Won_Donations_This_Year__c = closedWonDonationsThisYear;
+
+            // Set the RFME analysis date to today's date
             contact.RFME_Analysis_Date__c = Date.today();
 
             // Add contact to list of contacts to update
@@ -73,30 +86,30 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
         // Get the current date
         String currentDate = Date.today().format();
 
-        // Construct email content
-        String emailContent = '<h1>Updated Contacts</h1>';
-        emailContent += '<p>Date: ' + currentDate + '</p>';
-        emailContent += '<table border="1"><tr><th>Contact Name</th><th>Recency Score</th><th>Frequency Score</th><th>Monetary Score</th><th>Engagement Score</th></tr>';
+        // // Construct email content
+        // String emailContent = '<h1>Updated Contacts</h1>';
+        // emailContent += '<p>Date: ' + currentDate + '</p>';
+        // emailContent += '<table border="1"><tr><th>Contact Name</th><th>Recency Score</th><th>Frequency Score</th><th>Monetary Score</th><th>Engagement Score</th></tr>';
 
 
-        for (Contact contact : updatedContacts) {
-            emailContent += '<tr>';
-            emailContent += '<td>' + contact.Name + '</td>';
-            emailContent += '<td>' + contact.Recency__c + '</td>';
-            emailContent += '<td>' + contact.Number_Of_Opportunities__c + '</td>';
-            emailContent += '<td>' + contact.Monetary__c + '</td>';
-            emailContent += '<td>' + contact.Volunteer_or_Foster_Days_Between__c + '</td>';
-            emailContent += '</tr>';
-        }
+        // for (Contact contact : updatedContacts) {
+        //     emailContent += '<tr>';
+        //     emailContent += '<td>' + contact.Name + '</td>';
+        //     emailContent += '<td>' + contact.Recency__c + '</td>';
+        //     emailContent += '<td>' + contact.Number_Of_Opportunities__c + '</td>';
+        //     emailContent += '<td>' + contact.Monetary__c + '</td>';
+        //     emailContent += '<td>' + contact.Volunteer_or_Foster_Days_Between__c + '</td>';
+        //     emailContent += '</tr>';
+        // }
 
-        emailContent += '</table>';
+        // emailContent += '</table>';
 
-        // Send email
-        Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-        email.setToAddresses(new String[] { 'ddphillyfan@gmail.com' });
-        email.setSubject('RFME Analysis Batch Job Completed');
-        email.setHtmlBody(emailContent);
+        // // Send email
+        // Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+        // email.setToAddresses(new String[] { 'ddphillyfan@gmail.com' });
+        // email.setSubject('RFME Analysis Batch Job Completed');
+        // email.setHtmlBody(emailContent);
 
-        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { email });
+        // Messaging.sendEmail(new Messaging.SingleEmailMessage[] { email });
     }
 }
