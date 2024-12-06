@@ -49,7 +49,6 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
             String engagement = RFMEUtilityClass.calculateEngagement(contact, recency);
             Integer volunteerOrFosterStatus = RFMEUtilityClass.calculateVolunteerOrFosterStatus(contact);
             String impact = RFMEUtilityClass.calculateImpact(contact, frequency, monetary);
-            Integer closedWonDonationsThisYear = RFMEUtilityClass.calculateClosedWonDonationsThisYear(opportunities);
 
             // Update Contact record with RFME values
             contact.Recency__c = recency;
@@ -58,7 +57,6 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
             contact.Engagement__c = engagement;
             contact.Volunteer_Foster_Engagement__c = volunteerOrFosterStatus;
             contact.Impact__c = impact;
-            contact.Total_Closed_Won_Donations_This_Year__c = closedWonDonationsThisYear;
 
             // Set the RFME analysis date to today's date
             contact.RFME_Analysis_Date__c = Date.today();

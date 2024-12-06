@@ -185,6 +185,7 @@ public class RFMEUtilityClass {
             }
         }
         
+        
         System.debug('Monetary => ' + monetary);
         return monetary;
     }
@@ -336,39 +337,4 @@ public class RFMEUtilityClass {
         System.debug('Impact Level => ' + impactLevel);
         return impactLevel;
     }
-
-    /**
-    * @description Calculates total number of closed won donations for current year
-    * @param  opportunities List of opportunities to check
-    * @return              Total count of closed won donations this year
-    */
-    public static Integer calculateClosedWonDonationsThisYear(List<Opportunity> opportunities) {
-        System.debug('Calculating Closed Won Donations for Opportunities => ' + JSON.serialize(opportunities));
-
-        // Initialize closedWonDonationsThisYear to 0
-        Integer closedWonDonationsThisYear = 0;
-
-        // If there are no opportunities, return 0
-        if (opportunities == null || opportunities.isEmpty()){
-            return closedWonDonationsThisYear;
-        }
-        
-        // Get current year
-        Integer currentYear = Date.today().year();
-
-        // Count closed won donations this year
-        Integer donationCount = 0;
-        
-        // Loop through opportunities and count closed won donations this year
-        for (Opportunity opp : opportunities) {
-            if (opp.CloseDate.year() == currentYear 
-                && opp.StageName == 'Closed Won') {
-                donationCount++;
-            }
-        }
-        
-        System.debug('Closed Won Donations This Year => ' + donationCount);
-        return donationCount;
-    }
-
 }
