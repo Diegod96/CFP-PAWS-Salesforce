@@ -11,19 +11,12 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
 
     global Database.QueryLocator start(Database.BatchableContext BC) {
         
-        /*
-        String query = 'SELECT Id, Amount, npsp__Primary_Contact__c, CloseDate ' +
+        
+        String query = 'SELECT Id, Amount, StageName, npsp__Primary_Contact__c, CloseDate ' +
                        'FROM Opportunity ' +
                        'WHERE Amount != null AND npsp__Primary_Contact__c != null ' +
                        'AND CloseDate >= THIS_YEAR AND StageName = \'Closed Won\'';
-        */
-
-        // Query for Karla's contact record for debugging purposes
-        String query = 'SELECT Id, Amount,StageName, npsp__Primary_Contact__c, CloseDate ' +
-            'FROM Opportunity ' +
-            'WHERE npsp__Primary_Contact__c = \'003D100000YFigiIAD\' ' +
-            'AND StageName = \'Closed Won\' ' +
-            'AND CloseDate >= THIS_YEAR';
+        
 
         return Database.getQueryLocator(query);
     }
