@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : Diego Delgado
  * @group             : 
- * @last modified on  : 12-06-2024
+ * @last modified on  : 12-08-2024
  * @last modified by  : Diego Delgado
 **/
 global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.Stateful {
@@ -35,7 +35,7 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
         System.debug('contactToOpportunitiesMap => ' + contactToOpportunitiesMap);
 
         Set<Id> contactIds = contactToOpportunitiesMap.keySet();
-        List<Contact> contacts = [SELECT Id, Name, Last_volunteer_date__c, Date_Of_Current_Foster__c, Date_Of_Last_Foster_Returned__c FROM Contact WHERE Id IN :contactIds];
+        List<Contact> contacts = [SELECT Id, Name, Recency__c, Frequency__c, Monetary__c, Volunteer_Foster_Engagement__c, Impact__c, Total_Closed_Won_Donations_This_Year__c FROM Contact WHERE Id IN :contactIds];
 
         List<Contact> contactsToUpdate = new List<Contact>();
 
@@ -83,33 +83,10 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
     }
 
     global void finish(Database.BatchableContext BC) {
-        // Get the current date
-        String currentDate = Date.today().format();
-
-        // // Construct email content
-        // String emailContent = '<h1>Updated Contacts</h1>';
-        // emailContent += '<p>Date: ' + currentDate + '</p>';
-        // emailContent += '<table border="1"><tr><th>Contact Name</th><th>Recency Score</th><th>Frequency Score</th><th>Monetary Score</th><th>Engagement Score</th></tr>';
-
-
-        // for (Contact contact : updatedContacts) {
-        //     emailContent += '<tr>';
-        //     emailContent += '<td>' + contact.Name + '</td>';
-        //     emailContent += '<td>' + contact.Recency__c + '</td>';
-        //     emailContent += '<td>' + contact.Number_Of_Opportunities__c + '</td>';
-        //     emailContent += '<td>' + contact.Monetary__c + '</td>';
-        //     emailContent += '<td>' + contact.Volunteer_or_Foster_Days_Between__c + '</td>';
-        //     emailContent += '</tr>';
-        // }
-
-        // emailContent += '</table>';
-
-        // // Send email
-        // Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-        // email.setToAddresses(new String[] { 'ddphillyfan@gmail.com' });
-        // email.setSubject('RFME Analysis Batch Job Completed');
-        // email.setHtmlBody(emailContent);
-
-        // Messaging.sendEmail(new Messaging.SingleEmailMessage[] { email });
+        // Send completion email with updated contacts summary
+        RFMEUtilityClass.sendBatchCompletionEmail(updatedContacts);
+        
+        // Optional: Clear the list after sending
+        updatedContacts.clear();
     }
 }

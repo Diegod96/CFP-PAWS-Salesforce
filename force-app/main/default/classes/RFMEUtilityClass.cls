@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : Diego Delgado
  * @group             : 
- * @last modified on  : 01-13-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 01-21-2025
+ * @last modified by  : Diego Delgado
 **/
 public class RFMEUtilityClass {
     
@@ -370,5 +370,62 @@ public class RFMEUtilityClass {
         System.debug('Closed Won Donations This Year => ' + donationCount);
         return donationCount;
     }
+    
+    /**
+    * @description Sends an email to the user when the batch is complete
+    * @param  updatedContacts List of contacts that were updated
+    */
+    public static void sendBatchCompletionEmail(List<Contact> updatedContacts) {
+        // Process contacts in chunks of 10 to avoid hitting limits
+        Integer chunkSize = 10;
+        List<Messaging.SingleEmailMessage> allEmails = new List<Messaging.SingleEmailMessage>();
+        
+        for (Integer i = 0; i < updatedContacts.size(); i += chunkSize) {
+            List<Contact> contactChunk = new List<Contact>();
+            for (Integer j = i; j < Math.min(i + chunkSize, updatedContacts.size()); j++) {
+                contactChunk.add(updatedContacts[j]);
+            }
+            
+            // Create email for this chunk  
+            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+            email.setToAddresses(new List<String>{'ddphillyfan@gmail.com'});
+            email.setSubject('RFME Analysis Batch Job Update - Chunk ' + (i/chunkSize + 1));
+            email.setHtmlBody(buildEmailBody(contactChunk));
+            
+            allEmails.add(email);
+        }
+        
+        // Send all emails in one batch if there are any
+        if (!allEmails.isEmpty()) {
+            Messaging.sendEmail(allEmails);
+        }
+    }
 
+    private static String buildEmailBody(List<Contact> contacts) {
+        List<String> htmlRows = new List<String>();
+        for (Contact contact : contacts) {
+            htmlRows.add(String.format(
+                '<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>',
+                new List<String>{
+                    String.valueOf(contact.Name),
+                    String.valueOf(contact.Recency__c),
+                    String.valueOf(contact.Frequency__c),
+                    String.valueOf(contact.Monetary__c),
+                    String.valueOf(contact.Volunteer_Foster_Engagement__c)
+                }
+            ));
+        }
+        
+        return String.format(
+            '<h1>Updated Contacts</h1>' +
+            '<p>Date: {0}</p>' +
+            '<table border="1">' +
+            '<tr><th>Contact Name</th><th>Recency Score</th><th>Frequency Score</th><th>Monetary Score</th><th>Engagement Score</th></tr>' +
+            '{1}</table>',
+            new List<String>{
+                Date.today().format(),
+                String.join(htmlRows, '')
+            }
+        );
+    }
 }
