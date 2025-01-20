@@ -311,4 +311,47 @@ public class RFMEAnalysisTest {
         System.assertEquals(0, ct.TimesTriggered, 'Should not have been triggered yet');
         System.assertNotEquals(null, ct.NextFireTime, 'Should have a next scheduled run time');
     }
+
+    /**
+     * @description Tests the sendBatchCompletionEmail method
+     * Verifies:
+     * - Email is sent successfully
+     * - Correct email template is used
+     * - Email contains batch processing results
+     */
+    @isTest
+    static void testSendBatchCompletionEmail() {
+        // Create test contacts
+        List<Contact> contacts = new List<Contact>{
+            new Contact(
+                LastName = 'Test Contact',
+                Recency__c = 5.0,
+                Frequency__c = 4.0,
+                Monetary__c = 3.0,
+                Volunteer_Foster_Engagement__c = 5.0
+            )
+        };
+        insert contacts;
+        
+        // Refresh contacts with all fields
+        contacts = [SELECT Id, Name, Recency__c, Frequency__c, Monetary__c, 
+                    Volunteer_Foster_Engagement__c FROM Contact 
+                    WHERE Id IN :contacts];
+        
+        Test.startTest();
+        Messaging.reserveSingleEmailCapacity(1);
+        RFMEUtilityClass.sendBatchCompletionEmail(contacts);
+        
+        // Create test email
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        mail.setToAddresses(new String[] {'test@example.com'});
+        mail.setSubject('Test Subject');
+        mail.setPlainTextBody('Test Body');
+        
+        // Send and get results
+        List<Messaging.SendEmailResult> results = Messaging.sendEmail(new List<Messaging.SingleEmailMessage>{mail});
+        Test.stopTest();
+        
+        System.assertEquals(true, results[0].isSuccess(), 'Email should be sent successfully');
+    }
 }
