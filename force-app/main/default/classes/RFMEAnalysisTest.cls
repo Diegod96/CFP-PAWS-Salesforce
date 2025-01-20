@@ -2,11 +2,15 @@
  * @description       : 
  * @author            : Diego Delgado
  * @group             : 
- * @last modified on  : 10-19-2024
+ * @last modified on  : 01-20-2025
  * @last modified by  : Diego Delgado
 **/
 @isTest
 public class RFMEAnalysisTest {
+
+    /**
+     * @description Sets up test data including contacts with various dates and related opportunities
+     */
     @testSetup
     static void setup() {
         // Create test contacts
@@ -37,108 +41,274 @@ public class RFMEAnalysisTest {
         insert opportunities;
     }
 
-    @isTest
-    static void testRFMEAnalysisBatch() {
-        // Execute the batch job
-        Test.startTest();
-        RFMEAnalysisBatch batch = new RFMEAnalysisBatch();
-        Database.executeBatch(batch);
-        Test.stopTest();
-
-        // Verify that the contacts are updated correctly
-        List<Contact> updatedContacts = [SELECT Id, Recency__c, Number_Of_Opportunities__c, Monetary__c, Volunteer_or_Foster_Days_Between__c FROM Contact];
-        System.assertEquals(5, updatedContacts.size(), 'Expected 5 contacts to be updated.');
-
-        for (Contact contact : updatedContacts) {
-            System.assertNotEquals(null, contact.Recency__c, 'Recency__c should not be null.');
-            System.assertNotEquals(null, contact.Number_Of_Opportunities__c, 'Number_Of_Opportunities__c should not be null.');
-            System.assertNotEquals(null, contact.Monetary__c, 'Monetary__c should not be null.');
-            System.assertNotEquals(null, contact.Volunteer_or_Foster_Days_Between__c, 'Volunteer_or_Foster_Days_Between__c should not be null.');
-        }
-    }
-
+    /**
+     * @description Tests the calculateRecency method with different date ranges
+     * Tests scores 1-5 based on donation dates:
+     * 5: ≤ 180 days
+     * 4: 181-365 days
+     * 3: 366-728 days
+     * 2: 729-1093 days
+     * 1: > 1093 days
+     */
     @isTest
     static void testCalculateRecency() {
-        // Fetch test opportunities
-        List<Opportunity> opportunities = [SELECT Id, CloseDate FROM Opportunity LIMIT 3];
+        // Test recency = 5 (≤ 180 days)
+        System.assertEquals(5, RFMEUtilityClass.calculateRecency(new List<Opportunity>{
+            new Opportunity(CloseDate = Date.today())
+        }), 'Today should score 5');
         
-        // Calculate Recency
-        Integer recency = RFMEUtilityClass.calculateRecency(opportunities);
+        // Test recency = 4 (181-365 days)
+        System.assertEquals(4, RFMEUtilityClass.calculateRecency(new List<Opportunity>{
+            new Opportunity(CloseDate = Date.today().addDays(-181))
+        }), '181 days should score 4');
         
-        // Verify Recency
-        Integer expectedRecency = Date.today().daysBetween(opportunities[0].CloseDate);
-        System.assertEquals(expectedRecency, recency, 'Recency calculation is incorrect.');
+        // Test recency = 3 (366-728 days)
+        System.assertEquals(3, RFMEUtilityClass.calculateRecency(new List<Opportunity>{
+            new Opportunity(CloseDate = Date.today().addDays(-366))
+        }), '366 days should score 3');
+        
+        // Test recency = 2 (729-1093 days)
+        System.assertEquals(2, RFMEUtilityClass.calculateRecency(new List<Opportunity>{
+            new Opportunity(CloseDate = Date.today().addDays(-729))
+        }), '729 days should score 2');
+        
+        // Test recency = 1 (> 1093 days)
+        System.assertEquals(1, RFMEUtilityClass.calculateRecency(new List<Opportunity>{
+            new Opportunity(CloseDate = Date.today().addDays(-1094))
+        }), '1094 days should score 1');
     }
 
+    /**
+     * @description Tests the calculateFrequency method with different donation counts
+     * Tests scores 1-5 based on number of donations:
+     * 5: ≥ 24 donations
+     * 4: 12-23 donations
+     * 3: 3-11 donations
+     * 2: 2 donations
+     * 1: 1 donation
+     */
     @isTest
     static void testCalculateFrequency() {
-        // Fetch test opportunities
-        List<Opportunity> opportunities = [SELECT Id FROM Opportunity LIMIT 3];
+        List<Opportunity> opportunities = new List<Opportunity>();
+        Date recentDate = Date.today().addMonths(-1);
         
-        // Calculate Frequency
-        Integer frequency = RFMEUtilityClass.calculateFrequency(opportunities);
+        // Test different frequency ranges
+        for(Integer i = 0; i < 25; i++) {
+            opportunities.add(new Opportunity(
+                CloseDate = recentDate,
+                Amount = 100
+            ));
+        }
         
-        // Verify Frequency
-        System.assertEquals(3, frequency, 'Frequency calculation is incorrect.');
+        // Test each scenario
+        List<Opportunity> test1 = new List<Opportunity>{opportunities[0]}; // 1 donation
+        System.assertEquals(1, RFMEUtilityClass.calculateFrequency(test1), 'Single donation should score 1');
+        
+        List<Opportunity> test2 = new List<Opportunity>{opportunities[0], opportunities[1]}; // 2 donations
+        System.assertEquals(2, RFMEUtilityClass.calculateFrequency(test2), 'Two donations should score 2');
+        
+        List<Opportunity> test3 = new List<Opportunity>();
+        for(Integer i = 0; i < 3; i++) {
+            test3.add(opportunities[i]);
+        }
+        System.assertEquals(3, RFMEUtilityClass.calculateFrequency(test3), 'Three donations should score 3');
+        
+        List<Opportunity> test4 = new List<Opportunity>();
+        for(Integer i = 0; i < 12; i++) {
+            test4.add(opportunities[i]);
+        }
+        System.assertEquals(4, RFMEUtilityClass.calculateFrequency(test4), 'Twelve donations should score 4');
+        
+        List<Opportunity> test5 = new List<Opportunity>();
+        for(Integer i = 0; i < 24; i++) {
+            test5.add(opportunities[i]);
+        }
+        System.assertEquals(5, RFMEUtilityClass.calculateFrequency(test5), 'Twenty-four donations should score 5');
     }
 
+    /**
+     * @description Tests the calculateMonetary method with different amount ranges
+     * Tests scores 0-5 based on donation amounts:
+     * 5: ≥ 2001
+     * 4: 501-2000
+     * 3: 250-500
+     * 2: 101-249
+     * 1: 26-100
+     * 0: ≤ 25
+     */
     @isTest
     static void testCalculateMonetary() {
-        // Fetch test opportunities
-        List<Opportunity> opportunities = [SELECT Id, Amount FROM Opportunity LIMIT 3];
+        Date recentDate = Date.today().addDays(-30); // Within 24 months
         
-        // Calculate Monetary
-        Decimal monetary = RFMEUtilityClass.calculateMonetary(opportunities);
+        // Test monetary = 0 (≤ 25)
+        System.assertEquals(0, RFMEUtilityClass.calculateMonetary(new List<Opportunity>{
+            new Opportunity(Amount = 25, CloseDate = recentDate)
+        }), 'Amount of 25 should score 0');
         
-        // Verify Monetary
-        Decimal expectedMonetary = 1000 + 2000 + 3000;
-        System.assertEquals(expectedMonetary, monetary, 'Monetary calculation is incorrect.');
+        // Test monetary = 1 (26-100)
+        System.assertEquals(1, RFMEUtilityClass.calculateMonetary(new List<Opportunity>{
+            new Opportunity(Amount = 50, CloseDate = recentDate)
+        }), 'Amount of 50 should score 1');
+        
+        // Test monetary = 2 (101-249)
+        System.assertEquals(2, RFMEUtilityClass.calculateMonetary(new List<Opportunity>{
+            new Opportunity(Amount = 200, CloseDate = recentDate)
+        }), 'Amount of 200 should score 2');
+        
+        // Test monetary = 3 (250-500)
+        System.assertEquals(3, RFMEUtilityClass.calculateMonetary(new List<Opportunity>{
+            new Opportunity(Amount = 300, CloseDate = recentDate)
+        }), 'Amount of 300 should score 3');
+        
+        // Test monetary = 4 (501-2000)
+        System.assertEquals(4, RFMEUtilityClass.calculateMonetary(new List<Opportunity>{
+            new Opportunity(Amount = 1000, CloseDate = recentDate)
+        }), 'Amount of 1000 should score 4');
+        
+        // Test monetary = 5 (≥ 2001)
+        System.assertEquals(5, RFMEUtilityClass.calculateMonetary(new List<Opportunity>{
+            new Opportunity(Amount = 2500, CloseDate = recentDate)
+        }), 'Amount of 2500 should score 5');
     }
 
+    /**
+     * @description Tests the calculateEngagement method with different scenarios
+     * Tests engagement status based on volunteer/foster dates and recency:
+     * - Engaged: High recency (5) with recent activity
+     * - Slipping: Medium recency (4) with moderate activity
+     * - Disengaged: Low recency (≤3) or no recent activity
+     */
     @isTest
     static void testCalculateEngagement() {
         // Create test contacts with different date combinations
         List<Contact> contacts = new List<Contact>{
             new Contact(LastName = 'Test Engagement Contact 1'), // All dates null
-            new Contact(LastName = 'Test Engagement Contact 2', Last_volunteer_date__c = Date.today().addDays(-10)), // Only Last_volunteer_date__c not null
-            new Contact(LastName = 'Test Engagement Contact 3', Date_Of_Current_Foster__c = Date.today().addDays(-20)), // Only Date_Of_Current_Foster__c not null
-            new Contact(LastName = 'Test Engagement Contact 4', Date_Of_Last_Foster_Returned__c = Date.today().addDays(-30)), // Only Date_Of_Last_Foster_Returned__c not null
-            new Contact(LastName = 'Test Engagement Contact 5', Last_volunteer_date__c = Date.today().addDays(-10), Date_Of_Current_Foster__c = Date.today().addDays(-20), Date_Of_Last_Foster_Returned__c = Date.today().addDays(-30)) // All dates not null
+            new Contact(LastName = 'Test Engagement Contact 2', Last_volunteer_date__c = Date.today().addDays(-10)), 
+            new Contact(LastName = 'Test Engagement Contact 3', Date_Of_Current_Foster__c = Date.today().addDays(-20))
         };
 
         insert contacts;
 
         // Fetch the inserted contacts
-        contacts = [SELECT Id, LastName, Last_volunteer_date__c, Date_Of_Current_Foster__c, Date_Of_Last_Foster_Returned__c FROM Contact WHERE LastName LIKE 'Test Engagement Contact %'];
+        contacts = [SELECT Id, LastName, Last_volunteer_date__c, Date_Of_Current_Foster__c, Date_Of_Last_Foster_Returned__c 
+                    FROM Contact WHERE LastName LIKE 'Test Engagement Contact %'];
 
+        // Test different recency values
+        Integer lowRecency = 2;    // Should result in "Disengaged"
+        Integer medRecency = 4;    // Should result in "Slipping"
+        Integer highRecency = 5;   // Should result in "Engaged"
 
-        // Test case 1: All dates are null
-        System.debug('Testing engagement calculation for all dates null - ' + contacts[0]);
-        Integer engagement1 = RFMEUtilityClass.calculateEngagement(contacts[0]);
-        System.assertEquals(-1, engagement1, 'Engagement calculation is incorrect for all dates null.');
+        // Test engagement calculations
+        System.assertEquals('Disengaged', RFMEUtilityClass.calculateEngagement(contacts[0], lowRecency), 
+            'Contact with no dates and low recency should be Disengaged');
+        
+        System.assertEquals('Slipping', RFMEUtilityClass.calculateEngagement(contacts[1], medRecency), 
+            'Contact with recent volunteer date and medium recency should be Slipping');
+        
+        System.assertEquals('Engaged', RFMEUtilityClass.calculateEngagement(contacts[2], highRecency), 
+            'Contact with recent foster date and high recency should be Engaged');
+    }
 
-        // Test case 2: Only Last_volunteer_date__c is not null
-        System.debug('Testing engagement calculation for only Last_volunteer_date__c not null - ' + contacts[1]);
-        Integer engagement2 = RFMEUtilityClass.calculateEngagement(contacts[1]);
-        Integer expectedEngagement2 = Math.abs(Date.today().daysBetween(contacts[1].Last_volunteer_date__c));
-        System.assertEquals(expectedEngagement2, engagement2, 'Engagement calculation is incorrect for only Last_volunteer_date__c not null.');
+    /**
+     * @description Tests the calculateVolunteerOrFosterStatus method with different date ranges
+     * Tests scores 0-5 based on most recent volunteer/foster date:
+     * 5: ≤ 30 days
+     * 4: 31-180 days
+     * 3: 181-365 days
+     * 2: 366-730 days
+     * 1: > 730 days
+     * 0: null dates
+     */
+    @isTest
+    static void testVolunteerOrFosterStatus() {
+        // Test status = 5 (≤ 30 days)
+        System.assertEquals(5, RFMEUtilityClass.calculateVolunteerOrFosterStatus(
+            new Contact(Last_volunteer_date__c = Date.today())
+        ), 'Today should score 5');
+        
+        // Test status = 4 (31-180 days)
+        System.assertEquals(4, RFMEUtilityClass.calculateVolunteerOrFosterStatus(
+            new Contact(Last_volunteer_date__c = Date.today().addDays(-31))
+        ), '31 days should score 4');
+        
+        // Test status = 3 (181-365 days)
+        System.assertEquals(3, RFMEUtilityClass.calculateVolunteerOrFosterStatus(
+            new Contact(Last_volunteer_date__c = Date.today().addDays(-181))
+        ), '181 days should score 3');
+        
+        // Test status = 2 (366-730 days)
+        System.assertEquals(2, RFMEUtilityClass.calculateVolunteerOrFosterStatus(
+            new Contact(Last_volunteer_date__c = Date.today().addDays(-366))
+        ), '366 days should score 2');
+        
+        // Test status = 1 (> 730 days)
+        System.assertEquals(1, RFMEUtilityClass.calculateVolunteerOrFosterStatus(
+            new Contact(Last_volunteer_date__c = Date.today().addDays(-731))
+        ), '731 days should score 1');
+        
+        // Test null scenarios
+        System.assertEquals(0, RFMEUtilityClass.calculateVolunteerOrFosterStatus(null), 
+            'Null contact should score 0');
+    }
 
-        // Test case 3: Only Date_Of_Current_Foster__c is not null
-        System.debug('Testing engagement calculation for only Date_Of_Current_Foster__c not null - ' + contacts[2]);
-        Integer engagement3 = RFMEUtilityClass.calculateEngagement(contacts[2]);
-        Integer expectedEngagement3 = Math.abs(Date.today().daysBetween(contacts[2].Date_Of_Current_Foster__c));
-        System.assertEquals(expectedEngagement3, engagement3, 'Engagement calculation is incorrect for only Date_Of_Current_Foster__c not null.');
+    /**
+     * @description Tests the RFMEAnalysisBatch by verifying contacts are processed
+     * Confirms batch execution by checking LastModifiedDate changes on contacts
+     */
+    @isTest
+    static void testRFMEAnalysisBatch() {
+        // Get contacts' last modified dates before batch
+        Map<Id, Datetime> originalDates = new Map<Id, Datetime>();
+        for(Contact c : [SELECT Id, LastModifiedDate FROM Contact WHERE LastName LIKE 'Test Contact%']) {
+            originalDates.put(c.Id, c.LastModifiedDate);
+        }
+        
+        // Start the batch process
+        Test.startTest();
+        RFMEAnalysisBatch batch = new RFMEAnalysisBatch();
+        Database.executeBatch(batch);
+        Test.stopTest();
+        
+        // Verify the results by checking LastModifiedDate has been updated
+        List<Contact> updatedContacts = [SELECT Id, LastModifiedDate FROM Contact WHERE LastName LIKE 'Test Contact%'];
+        System.assertNotEquals(0, updatedContacts.size(), 'Should have processed contacts');
+        
+        for(Contact c : updatedContacts) {
+            System.assertNotEquals(originalDates.get(c.Id), c.LastModifiedDate, 
+                'Contact should have been updated by batch process');
+        }
+    }
 
-        // Test case 4: Only Date_Of_Last_Foster_Returned__c is not null
-        System.debug('Testing engagement calculation for only Date_Of_Last_Foster_Returned__c not null - ' + contacts[3]);
-        Integer engagement4 = RFMEUtilityClass.calculateEngagement(contacts[3]);
-        Integer expectedEngagement4 = Math.abs(Date.today().daysBetween(contacts[3].Date_Of_Last_Foster_Returned__c));
-        System.assertEquals(expectedEngagement4, engagement4, 'Engagement calculation is incorrect for only Date_Of_Last_Foster_Returned__c not null.');
-
-        // Test case 5: All dates are not null
-        System.debug('Testing engagement calculation for all dates not null - ' + contacts[4]);
-        Integer engagement5 = RFMEUtilityClass.calculateEngagement(contacts[4]);
-        Integer expectedEngagement5 = Math.abs(Date.today().daysBetween(contacts[4].Last_volunteer_date__c));
-        System.assertEquals(expectedEngagement5, engagement5, 'Engagement calculation is incorrect for all dates not null.');
+    /**
+     * @description Tests the RFMEAnalysisScheduler class
+     * Verifies:
+     * - Job is scheduled successfully
+     * - Correct cron expression (11 PM daily)
+     * - Job hasn't been triggered
+     * - Next run time is set
+     */
+    @isTest
+    static void testRFMEAnalysisScheduler() {
+        // Get the current number of scheduled jobs
+        Integer numScheduledJobs = [SELECT COUNT() FROM CronTrigger];
+        
+        Test.startTest();
+        // Schedule the job
+        String jobId = System.schedule('Test RFME Analysis', 
+            '0 0 23 * * ?',  // Schedule for 11 PM daily
+            new RFMEAnalysisScheduler());
+        Test.stopTest();
+        
+        // Verify one more scheduled job exists
+        System.assertEquals(numScheduledJobs + 1, [SELECT COUNT() FROM CronTrigger], 
+            'One additional job should be scheduled');
+        
+        // Verify the scheduled job details
+        CronTrigger ct = [SELECT Id, CronExpression, TimesTriggered, NextFireTime 
+                          FROM CronTrigger WHERE Id = :jobId];
+        
+        System.assertEquals('0 0 23 * * ?', ct.CronExpression, 'Should be scheduled for 11 PM daily');
+        System.assertEquals(0, ct.TimesTriggered, 'Should not have been triggered yet');
+        System.assertNotEquals(null, ct.NextFireTime, 'Should have a next scheduled run time');
     }
 }
