@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : Diego Delgado
  * @group             : 
- * @last modified on  : 01-21-2025
+ * @last modified on  : 01-28-2025
  * @last modified by  : Diego Delgado
 **/
 public class RFMEUtilityClass {
@@ -376,6 +376,9 @@ public class RFMEUtilityClass {
     * @param  updatedContacts List of contacts that were updated
     */
     public static void sendBatchCompletionEmail(List<Contact> updatedContacts) {
+        
+        System.debug('Sending Batch Completion Email for Updated Contacts => ' + JSON.serialize(updatedContacts));
+
         // Process contacts in chunks of 10 to avoid hitting limits
         Integer chunkSize = 10;
         List<Messaging.SingleEmailMessage> allEmails = new List<Messaging.SingleEmailMessage>();
@@ -397,6 +400,7 @@ public class RFMEUtilityClass {
         
         // Send all emails in one batch if there are any
         if (!allEmails.isEmpty()) {
+            System.debug('Sending Email => ' + JSON.serialize(allEmails));
             Messaging.sendEmail(allEmails);
         }
     }

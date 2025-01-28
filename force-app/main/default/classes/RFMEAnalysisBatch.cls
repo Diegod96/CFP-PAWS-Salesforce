@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : Diego Delgado
  * @group             : 
- * @last modified on  : 12-08-2024
+ * @last modified on  : 01-28-2025
  * @last modified by  : Diego Delgado
 **/
 global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.Stateful {
@@ -35,7 +35,7 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
         System.debug('contactToOpportunitiesMap => ' + contactToOpportunitiesMap);
 
         Set<Id> contactIds = contactToOpportunitiesMap.keySet();
-        List<Contact> contacts = [SELECT Id, Name, Recency__c, Frequency__c, Monetary__c, Volunteer_Foster_Engagement__c, Impact__c, Total_Closed_Won_Donations_This_Year__c FROM Contact WHERE Id IN :contactIds];
+        List<Contact> contacts = [SELECT Id, Name, Recency__c, Frequency__c, Monetary__c, Volunteer_Foster_Engagement__c, Impact__c, Total_Closed_Won_Donations_This_Year__c, Last_volunteer_date__c, Date_Of_Current_Foster__c, Date_Of_Last_Foster_Returned__c FROM Contact WHERE Id IN :contactIds];
 
         List<Contact> contactsToUpdate = new List<Contact>();
 
@@ -86,7 +86,7 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
         // Send completion email with updated contacts summary
         RFMEUtilityClass.sendBatchCompletionEmail(updatedContacts);
         
-        // Optional: Clear the list after sending
+        // Clear the list after sending
         updatedContacts.clear();
     }
 }
