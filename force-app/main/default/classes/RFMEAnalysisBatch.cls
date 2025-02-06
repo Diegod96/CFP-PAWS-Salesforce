@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : Diego Delgado
  * @group             : 
- * @last modified on  : 01-28-2025
+ * @last modified on  : 02-06-2025
  * @last modified by  : Diego Delgado
 **/
 global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.Stateful {
@@ -15,7 +15,8 @@ global class RFMEAnalysisBatch implements Database.Batchable<SObject>, Database.
         String query = 'SELECT Id, Amount, StageName, npsp__Primary_Contact__c, CloseDate ' +
                        'FROM Opportunity ' +
                        'WHERE Amount != null AND npsp__Primary_Contact__c != null ' +
-                       'AND CloseDate >= THIS_YEAR AND StageName = \'Closed Won\'';
+                       'AND CloseDate >= ' + String.valueOf(Date.newInstance(Date.today().year() - 5, 1, 1)).removeEnd(' 00:00:00') + 
+                       ' AND CloseDate <= TODAY AND StageName = \'Closed Won\'';
         
 
         return Database.getQueryLocator(query);
