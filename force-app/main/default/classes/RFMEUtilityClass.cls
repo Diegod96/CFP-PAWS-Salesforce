@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : Diego Delgado
  * @group             : 
- * @last modified on  : 01-28-2025
+ * @last modified on  : 02-18-2025
  * @last modified by  : Diego Delgado
 **/
 public class RFMEUtilityClass {
@@ -376,60 +376,74 @@ public class RFMEUtilityClass {
     * @param  updatedContacts List of contacts that were updated
     */
     public static void sendBatchCompletionEmail(List<Contact> updatedContacts) {
-        
-        System.debug('Sending Batch Completion Email for Updated Contacts => ' + JSON.serialize(updatedContacts));
-
-        // Process contacts in chunks of 10 to avoid hitting limits
-        Integer chunkSize = 10;
-        List<Messaging.SingleEmailMessage> allEmails = new List<Messaging.SingleEmailMessage>();
-        
-        for (Integer i = 0; i < updatedContacts.size(); i += chunkSize) {
-            List<Contact> contactChunk = new List<Contact>();
-            for (Integer j = i; j < Math.min(i + chunkSize, updatedContacts.size()); j++) {
-                contactChunk.add(updatedContacts[j]);
+        // Filter for only Slipping contacts
+        List<Contact> slippingContacts = new List<Contact>();
+        for(Contact c : updatedContacts) {
+            if(c.Engagement__c == 'Slipping') {
+                slippingContacts.add(c);
             }
-            
-            // Create email for this chunk  
-            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-            email.setToAddresses(new List<String>{'ddphillyfan@gmail.com'});
-            email.setSubject('RFME Analysis Batch Job Update - Chunk ' + (i/chunkSize + 1));
-            email.setHtmlBody(buildEmailBody(contactChunk));
-            
-            allEmails.add(email);
         }
         
-        // Send all emails in one batch if there are any
-        if (!allEmails.isEmpty()) {
-            System.debug('Sending Email => ' + JSON.serialize(allEmails));
-            Messaging.sendEmail(allEmails);
+        // Sort by Impact (High Impact first)
+        slippingContacts.sort();
+        
+        // Create and send email
+        Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+        email.setToAddresses(new List<String>{'ddphillyfan@gmail.com'});
+        email.setSubject('RFME Analysis Update - ' + Date.today().format());
+        email.setHtmlBody(buildEmailBody(updatedContacts.size(), slippingContacts));
+        
+        if (!slippingContacts.isEmpty()) {
+            Messaging.sendEmail(new List<Messaging.SingleEmailMessage>{email});
         }
     }
 
-    private static String buildEmailBody(List<Contact> contacts) {
+    /**
+    * @description Builds the email body
+    * @param  totalContacts Total number of contacts updated
+    * @param  slippingContacts List of contacts whose engagement is slipping
+    * @return          HTML email body
+    */
+    private static String buildEmailBody(Integer totalContacts, List<Contact> slippingContacts) {
+        String emailBody = '<h1>RFME Analysis from ' + Date.today().format() + '</h1>';
+        emailBody += '<p>Successfully updated ' + totalContacts + ' contact(s).</p>';
+        
+        if(!slippingContacts.isEmpty()) {
+            emailBody += '<p>' + slippingContacts.size() + ' contact(s) have an engagement status of Slipping.</p>';
+            emailBody += '<h2>The following contact(s) are donors whose engagement is slipping:</h2>';
+            emailBody += buildContactTable(slippingContacts);
+        }
+        
+        return emailBody;
+    }
+
+    /**
+    * @description Builds a table of contacts with their scores
+    * @param  contacts List of contacts to build the table from
+    * @return          HTML table of contacts
+    */
+    private static String buildContactTable(List<Contact> contacts) {
         List<String> htmlRows = new List<String>();
         for (Contact contact : contacts) {
             htmlRows.add(String.format(
-                '<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>',
+                '<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td></tr>',
                 new List<String>{
                     String.valueOf(contact.Name),
                     String.valueOf(contact.Recency__c),
                     String.valueOf(contact.Frequency__c),
                     String.valueOf(contact.Monetary__c),
-                    String.valueOf(contact.Volunteer_Foster_Engagement__c)
+                    String.valueOf(contact.Engagement__c),
+                    String.valueOf(contact.Impact__c)
                 }
             ));
         }
         
         return String.format(
-            '<h1>Updated Contacts</h1>' +
-            '<p>Date: {0}</p>' +
             '<table border="1">' +
-            '<tr><th>Contact Name</th><th>Recency Score</th><th>Frequency Score</th><th>Monetary Score</th><th>Engagement Score</th></tr>' +
-            '{1}</table>',
-            new List<String>{
-                Date.today().format(),
-                String.join(htmlRows, '')
-            }
+            '<tr><th>Contact Name</th><th>Recency Score</th><th>Frequency Score</th>' +
+            '<th>Monetary Score</th><th>Engagement Score</th><th>Financial Impact</th></tr>' +
+            '{0}</table>',
+            new List<String>{String.join(htmlRows, '')}
         );
     }
 }
