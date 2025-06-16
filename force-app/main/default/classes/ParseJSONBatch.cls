@@ -38,7 +38,7 @@ public class ParseJSONBatch implements Database.Batchable<SObject>, Database.Sta
 
         // Query for the Contact records based on the parsed IDs
         return Database.getQueryLocator([
-                SELECT Id, Last_Sync_With_Pipeline__c, First_volunteer_date__c, Last_volunteer_date__c, Duplicate_Person_Ids__c, Duplicate_Volgistic_Ids__c, Foster_Start_Date__c, Foster_End_Date__c, Total_volunteer_hours__c, Volunteer_Status__c
+                SELECT Id, Last_Sync_With_Pipeline__c, First_volunteer_date__c,Duplicated_Person_Ids__c,Duplicated_Volgistics_Ids__c, Last_volunteer_date__c, Foster_Start_Date__c, Latest_Foster_Event__c,Last_Shift_Date__c, Total_volunteer_hours__c, Volunteer_Status__c
                 FROM Contact
                 WHERE Id IN :contactIds
         ]);
@@ -73,6 +73,9 @@ public class ParseJSONBatch implements Database.Batchable<SObject>, Database.Sta
                 stringPersonIds = stringPersonIds == '[]' ? '[]' : stringPersonIds;
                 stringVolgisticIds = stringVolgisticIds == '[]' ? '[]' : stringVolgisticIds;
 
+                System.debug('Person Ids -> ' + stringPersonIds);
+                System.debug('Volgistic Ids -> ' + stringVolgisticIds);
+
                 // Modify the strings by removing brackets if they are not '[]'
                 String stringPersonIdsModified = stringPersonIds != null && stringPersonIds != '[]'
                     ? stringPersonIds.replace('[', '').replace(']', '')
@@ -82,15 +85,19 @@ public class ParseJSONBatch implements Database.Batchable<SObject>, Database.Sta
                     ? stringVolgisticIds.replace('[', '').replace(']', '')
                     : (stringVolgisticIds != null ? stringVolgisticIds : '');
 
+                System.debug('Person Ids Modified -> ' + stringPersonIdsModified);
+                System.debug('Volgistic Ids Modified -> ' + stringVolgisticIdsModified);
+
                 contact.Last_Sync_With_Pipeline__c = Datetime.now();
                 contact.First_volunteer_date__c = contactInfo.get('firstVolunteerDate') != null ? Date.valueOf((String) contactInfo.get('firstVolunteerDate')) : contact.First_volunteer_date__c;
-                contact.Foster_End_Date__c = contactInfo.get('fosterEndDate') != null ? Date.valueOf((String) contactInfo.get('fosterEndDate')) : contact.Foster_End_Date__c;
+                contact.Latest_Foster_Event__c = contactInfo.get('latestFosterEvent') != null ? Date.valueOf((String) contactInfo.get('latestFosterEvent')) : contact.Latest_Foster_Event__c;
                 contact.Foster_Start_Date__c = contactInfo.get('fosterStartDate') != null ? Date.valueOf((String) contactInfo.get('fosterStartDate')) : contact.Foster_Start_Date__c;
                 contact.Last_Shift_Date__c = contactInfo.get('lastShiftDate') != null ? Date.valueOf((String) contactInfo.get('lastShiftDate')) : contact.Last_Shift_Date__c;
                 contact.Total_volunteer_hours__c = contactInfo.get('totalVolunteerHours') != null ? Decimal.valueOf(contactInfo.get('totalVolunteerHours').toString()) : contact.Total_volunteer_hours__c;
-                contact.Volunteer_Status__c = contactInfo.get('volunteerStatus') != null ? (String) contactInfo.get('volunteerStatus') : contact.Volunteer_Status__c;
                 contact.Duplicated_Volgistics_Ids__c = stringVolgisticIdsModified;
                 contact.Duplicated_Person_Ids__c = stringPersonIdsModified;
+                contact.Volunteer_Status__c = contactInfo.get('volunteerStatus') != null ? (String) contactInfo.get('volunteerStatus') : contact.Volunteer_Status__c;
+
 
                 contactsToUpdate.add(contact);
             }

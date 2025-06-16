@@ -19,7 +19,7 @@ public class ParseJSONBatchTest {
                 First_volunteer_date__c = Date.newInstance(2020, 1, 1),
                 Last_Shift_Date__c = Date.newInstance(2020, 1, 1),
                 Foster_Start_Date__c = Date.newInstance(2020, 6, 1),
-                Foster_End_Date__c = Date.newInstance(2021, 6, 1),
+                Latest_Foster_Event__c = Date.newInstance(2021, 6, 1),
                 Duplicated_Person_Ids__c = '',
                 Duplicated_Volgistics_Ids__c = '',
                 Total_volunteer_hours__c = 50
@@ -124,7 +124,7 @@ public class ParseJSONBatchTest {
                 '"firstVolunteerDate": "2022-01-01", ' +
                 '"lastShiftDate": "2022-01-01", ' +
                 '"fosterStartDate": "2022-06-01", ' +
-                '"fosterEndDate": "2023-06-01", ' +
+                '"latestFosterEvent": "2023-06-01", ' +
                 '"personIds": "[123,12345]", ' +
                 '"volgisticIds": "[123,12345]", ' +
                 '"totalVolunteerHours": "' + totalVolunteerHours + '"},';
